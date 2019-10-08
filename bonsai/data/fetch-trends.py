@@ -1,6 +1,7 @@
 import datetime
 import pytrends
 import csv
+import matplotlib.pyplot as plt
 from pytrends.request import TrendReq
 
 def last_day_of_month(any_day):
@@ -73,3 +74,5 @@ def create_csv(data, filename):
 if __name__ == "__main__":
     data = parse_phrase_trend("SeaWorld")
     create_csv(data, "bonsai\\trend-data\\trend-seaworld.csv")
+    plt.plot(data)
+    plt.show()
