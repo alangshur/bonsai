@@ -1,75 +1,61 @@
+# import ML libraries
 from keras.datasets import mnist
 from keras.models import Sequential
 import keras.layers as layers
 import matplotlib.pyplot as plt
 import keras
+import matplotlib.pyplot as plt
+from keras import datasets, layers, models
 
 # setup train and test splits
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
-xh, xw = x_train[0].shape
 
-# pre-process data
-x_train = x_train.reshape(x_train.shape[0], xh, xw, 1)
-x_test = x_test.reshape(x_test.shape[0], xh, xw, 1)
-x_train = x_train.astype('float32') / 255
-x_test = x_test.astype('float32') / 255
-input_shape = (xh, xw, 1)
+# pre-process images
+x_train /= 255.0
+x_test /= 255.0
 
 # convert to one-hot encoding
 num_classes = 10
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
+print("Processed training data shape: ", x_train.shape)
+print("Processed test data shape: ", x_test.shape)
 
-# build CNN model
-model = Sequential()
-model.add(layers.Conv2D(128, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-model.add(layers.Conv2D(256, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-model.add(layers.Dropout(0.3))
-model.add(layers.Flatten())
-model.add(layers.Dense(256, activation='relu'))
-model.add(layers.Dropout(0.3))
-model.add(layers.Dense(128, activation='relu'))
-model.add(layers.Dropout(0.3))
-model.add(layers.Dense(num_classes, activation='softmax'))
+def create_nn():
+    model = models.Sequential()
+    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28)))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    return model
 
-# compile model for training
-model.compile(
-    optimizer='adam', 
-    loss='categorical_crossentropy', 
-    metrics=['accuracy']
-)
+    # model = Sequential()
+    # model.add(Dense(layer_sizes[0], activation='relu', input_shape=(image_vector_size,)))
 
-#model training
-model_log = model.fit(x_train, y_train,
-    batch_size=128,
-    epochs=8,
-    verbose=True,
-    validation_data=(x_test, y_test)
-)
+    # for s in layer_sizes[1:]:
+    #     model.add(Dense(units = s, activation = 'relu'))
 
-# plot result
-fig = plt.figure()
-plt.subplot(2, 1, 1)
-plt.plot(model_log.history['accuracy'])
-plt.plot(model_log.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='lower right')
-plt.subplot(2,1,2)
-plt.plot(model_log.history['loss'])
-plt.plot(model_log.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper right')
-plt.tight_layout()
-plt.show()
+    # model.add(Dense(units=num_classes, activation='softmax'))
+    # return model
 
-# save model
-model_digit_json = model.to_json()
-with open("mnist\model_digit.json", "w") as json_file:
-    json_file.write(model_digit_json)
-model.save_weights("mnist\model_digit.h5")
+def evaluate(model, batch_size=32, epochs=10):
+    model.summary()
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=.1, verbose=True)
+    loss, accuracy  = model.evaluate(x_test, y_test, verbose=False)
+    
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['training', 'validation'], loc='best')
+    plt.show()
+
+    print()
+    print(f'Test loss: {loss:.3}')
+    print(f'Test accuracy: {accuracy:.3}')
+
+# model = create_dense([256, 128, 64, 32])
+# evaluate(model)
