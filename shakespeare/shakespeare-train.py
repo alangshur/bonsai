@@ -73,11 +73,17 @@ def train_model():
     )
 
     # train the model
-    epochs = 10
+    epochs = 30
     history = model.fit(dataset,
         epochs=epochs,
         callbacks=[checkpoint_callback]
     )
+
+    # save model
+    model_digit_json = model.to_json()
+    with open("shakespeare\\model_digit.json", "w") as json_file:
+        json_file.write(model_digit_json)
+    model.save_weights("shakespeare\\model_digit.h5")
 
 def generate_model(start_string):
     embedding_dim = 256
@@ -98,7 +104,7 @@ def generate_model(start_string):
     vocab_size = len(vocab)
 
     # rebuild model
-    checkpoint_dir = 'shakespeare\\training-checkpoints'
+    checkpoint_dir = "shakespeare\\training-checkpoints"
     model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
     model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
     model.build(tf.TensorShape([1, None]))
