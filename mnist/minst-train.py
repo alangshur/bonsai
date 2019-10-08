@@ -30,15 +30,6 @@ def create_nn():
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     return model
 
-    # model = Sequential()
-    # model.add(Dense(layer_sizes[0], activation='relu', input_shape=(image_vector_size,)))
-
-    # for s in layer_sizes[1:]:
-    #     model.add(Dense(units = s, activation = 'relu'))
-
-    # model.add(Dense(units=num_classes, activation='softmax'))
-    # return model
-
 def evaluate(model, batch_size=32, epochs=10):
     model.summary()
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
@@ -57,5 +48,5 @@ def evaluate(model, batch_size=32, epochs=10):
     print(f'Test loss: {loss:.3}')
     print(f'Test accuracy: {accuracy:.3}')
 
-# model = create_dense([256, 128, 64, 32])
-# evaluate(model)
+model = create_dense([256, 128, 64, 32])
+evaluate(model)
